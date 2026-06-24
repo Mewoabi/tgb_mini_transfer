@@ -9,6 +9,9 @@ spring:
       # bien depuis l'hôte que depuis un conteneur, tout en gardant le support des
       # transactions multi-documents.
       uri: ${MONGODB_URI:mongodb://localhost:27017/minitransfer?directConnection=true}
+      # Crée automatiquement au démarrage les index déclarés par annotation (@Indexed),
+      # notamment les index uniques sur l'email et le téléphone.
+      auto-index-creation: true
 
 server:
   port: 8080
