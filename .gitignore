@@ -1,0 +1,51 @@
+# ============================================================
+# MiniTransfer — .gitignore racine
+# ============================================================
+
+# ----- Système / OS -----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ----- IDE / Éditeurs -----
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*~
+
+# ----- Variables d'environnement / secrets -----
+.env
+*.env
+!*.env.example
+
+# ============================================================
+# Backend — Java / Maven / Spring Boot
+# ============================================================
+backend/target/
+*.class
+*.log
+hs_err_pid*
+# NB : le wrapper Maven (backend/.mvn/, mvnw, mvnw.cmd) est versionné volontairement
+# afin que les évaluateurs puissent compiler sans installer Maven.
+
+# ============================================================
+# Mobile — Flutter / Dart
+# ============================================================
+mobile/.dart_tool/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/.packages
+mobile/.pub-cache/
+mobile/.pub/
+mobile/build/
+mobile/**/generated_plugin_registrant.*
+mobile/ios/Flutter/Generated.xcconfig
+mobile/ios/Pods/
+mobile/android/.gradle/
+mobile/android/local.properties
+mobile/android/key.properties
+mobile/android/**/GeneratedPluginRegistrant.java
+*.g.dart.bak

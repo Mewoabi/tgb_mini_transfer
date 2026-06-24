@@ -1,0 +1,36 @@
+# ============================================================
+# MiniTransfer — Orchestration des services
+# ------------------------------------------------------------
+# Étape 0 : MongoDB seul, configuré en replica set mono-nœud (rs0).
+#           Le replica set est le prérequis (uniquement côté infrastructure)
+#           aux transactions multi-documents ACID utilisées pour les transferts.
+#           Le service "backend" sera ajouté à l'étape B9 (dockerisation).
+# ============================================================
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: minitransfer-mongo
+    restart: unless-stopped
+    # --replSet rs0 : démarre l'instance en mode replica set (nécessaire aux transactions).
+    # --bind_ip_all : accepte les connexions depuis l'hôte et les autres conteneurs Docker.
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    # Le healthcheck initialise automatiquement le replica set au premier démarrage
+    # (opération idempotente : ré-exécutée, rs.initiate échoue et on relit simplement rs.status).
+    healthcheck:
+      test: >
+        mongosh --quiet --eval "
+          try { rs.status().ok }
+          catch (e) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'localhost:27017' }] }).ok }
+        "
+      interval: 5s
+      timeout: 30s
+      start_period: 5s
+      retries: 30
+
+volumes:
+  mongo_data:
