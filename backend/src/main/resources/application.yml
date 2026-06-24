@@ -1,0 +1,30 @@
+# Configuration de l'application MiniTransfer (backend Spring Boot).
+spring:
+  application:
+    name: MiniTransfer
+  data:
+    mongodb:
+      # URI surchargeable via la variable d'environnement MONGODB_URI (ex. en Docker).
+      # directConnection=true : connexion directe au nœud du replica set, valable aussi
+      # bien depuis l'hôte que depuis un conteneur, tout en gardant le support des
+      # transactions multi-documents.
+      uri: ${MONGODB_URI:mongodb://localhost:27017/minitransfer?directConnection=true}
+
+server:
+  port: 8080
+
+# Exposition de l'endpoint de santé (permet de vérifier la connexion à MongoDB).
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+# Paramètres JWT — exploités à partir de l'étape sécurité (B3). À surcharger en production.
+app:
+  jwt:
+    secret: ${JWT_SECRET:dev-secret-a-remplacer-par-une-valeur-aleatoire-de-256-bits-0123456789}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
