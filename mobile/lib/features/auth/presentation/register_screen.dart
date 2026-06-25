@@ -7,23 +7,27 @@ import '../../../core/router/app_router.dart';
 import '../../../core/utils/validators.dart';
 import '../application/auth_controller.dart';
 
-/// Écran de connexion (email + mot de passe).
-class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+/// Écran d'inscription (nom, email, téléphone, mot de passe).
+class RegisterScreen extends ConsumerStatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _submitting = false;
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -32,8 +36,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _submitting = true);
     try {
-      await ref.read(authControllerProvider.notifier).login(
+      await ref.read(authControllerProvider.notifier).register(
+            name: _nameController.text.trim(),
             email: _emailController.text.trim(),
+            phone: _phoneController.text.trim(),
             password: _passwordController.text,
           );
       // Succès : la garde du routeur redirige automatiquement vers l'accueil.
@@ -49,7 +55,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Connexion')),
+      appBar: AppBar(title: const Text('Inscription')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -59,8 +65,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 8),
-                Text('Bon retour 👋', style: Theme.of(context).textTheme.headlineSmall),
+                Text('Créer un compte', style: Theme.of(context).textTheme.headlineSmall),
                 const SizedBox(height: 24),
+                TextFormField(
+                  controller: _nameController,
+                  textInputAction: TextInputAction.next,
+                  decoration: const InputDecoration(
+                    labelText: 'Nom',
+                    prefixIcon: Icon(Icons.person_outline),
+                  ),
+                  validator: (value) => Validators.notEmpty(value, 'Le nom est obligatoire.'),
+                ),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -73,6 +89,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  textInputAction: TextInputAction.next,
+                  decoration: const InputDecoration(
+                    labelText: 'Téléphone',
+                    prefixIcon: Icon(Icons.phone_outlined),
+                  ),
+                  validator: Validators.phone,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
                   controller: _passwordController,
                   obscureText: true,
                   textInputAction: TextInputAction.done,
@@ -80,8 +107,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     labelText: 'Mot de passe',
                     prefixIcon: Icon(Icons.lock_outline),
                   ),
-                  validator: (value) =>
-                      Validators.notEmpty(value, 'Le mot de passe est obligatoire.'),
+                  validator: Validators.password,
                   onFieldSubmitted: (_) => _submit(),
                 ),
                 const SizedBox(height: 24),
@@ -93,11 +119,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Se connecter'),
+                      : const Text("S'inscrire"),
                 ),
                 TextButton(
-                  onPressed: _submitting ? null : () => context.go(AppRoutes.register),
-                  child: const Text("Pas de compte ? S'inscrire"),
+                  onPressed: _submitting ? null : () => context.go(AppRoutes.login),
+                  child: const Text('Déjà un compte ? Se connecter'),
                 ),
               ],
             ),

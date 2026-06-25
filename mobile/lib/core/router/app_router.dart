@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/application/auth_controller.dart';
 import '../../features/auth/presentation/login_screen.dart';
+import '../../features/auth/presentation/register_screen.dart';
 import '../../features/wallet/presentation/home_screen.dart';
 import '../presentation/splash_screen.dart';
 
@@ -12,6 +13,7 @@ class AppRoutes {
   const AppRoutes._();
   static const String splash = '/splash';
   static const String login = '/login';
+  static const String register = '/register';
   static const String home = '/home';
 }
 
@@ -41,15 +43,16 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       }
 
       final loggedIn = status == AuthStatus.authenticated;
-      final atLogin = location == AppRoutes.login;
+      final atAuthRoute =
+          location == AppRoutes.login || location == AppRoutes.register;
 
-      // Non connecté : tout renvoie vers la connexion.
+      // Non connecté : tout renvoie vers la connexion (sauf les écrans d'authentification).
       if (!loggedIn) {
-        return atLogin ? null : AppRoutes.login;
+        return atAuthRoute ? null : AppRoutes.login;
       }
 
-      // Connecté : on éloigne du splash et de la connexion.
-      if (location == AppRoutes.splash || atLogin) {
+      // Connecté : on éloigne du splash et des écrans d'authentification.
+      if (location == AppRoutes.splash || atAuthRoute) {
         return AppRoutes.home;
       }
       return null;
@@ -57,6 +60,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(path: AppRoutes.splash, builder: (_, _) => const SplashScreen()),
       GoRoute(path: AppRoutes.login, builder: (_, _) => const LoginScreen()),
+      GoRoute(path: AppRoutes.register, builder: (_, _) => const RegisterScreen()),
       GoRoute(path: AppRoutes.home, builder: (_, _) => const HomeScreen()),
     ],
   );
