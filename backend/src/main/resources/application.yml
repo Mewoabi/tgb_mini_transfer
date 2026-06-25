@@ -5,10 +5,11 @@ spring:
   data:
     mongodb:
       # URI surchargeable via la variable d'environnement MONGODB_URI (ex. en Docker).
-      # directConnection=true : connexion directe au nœud du replica set, valable aussi
-      # bien depuis l'hôte que depuis un conteneur, tout en gardant le support des
-      # transactions multi-documents.
-      uri: ${MONGODB_URI:mongodb://localhost:27017/minitransfer?directConnection=true}
+      # replicaSet=rs0 : le pilote reconnaît le replica set, condition nécessaire aux
+      # transactions multi-documents (un nœud vu comme « autonome » les refuserait).
+      # Port 27018 : celui exposé par le conteneur MongoDB (voir docker-compose.yml), choisi
+      # pour ne pas entrer en conflit avec une éventuelle instance MongoDB locale sur 27017.
+      uri: ${MONGODB_URI:mongodb://localhost:27018/minitransfer?replicaSet=rs0}
       # Crée automatiquement au démarrage les index déclarés par annotation (@Indexed),
       # notamment les index uniques sur l'email et le téléphone.
       auto-index-creation: true
