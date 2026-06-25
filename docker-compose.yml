@@ -1,10 +1,7 @@
 # ============================================================
 # MiniTransfer — Orchestration des services
 # ------------------------------------------------------------
-# Étape 0 : MongoDB seul, configuré en replica set mono-nœud (rs0).
-#           Le replica set est le prérequis (uniquement côté infrastructure)
-#           aux transactions multi-documents ACID utilisées pour les transferts.
-#           Le service "backend" sera ajouté à l'étape B9 (dockerisation).
+# `docker compose up --build` démarre l'ensemble (MongoDB + API backend) en une étape.
 # ============================================================
 
 services:
@@ -12,29 +9,41 @@ services:
     image: mongo:7
     container_name: minitransfer-mongo
     restart: unless-stopped
-    # --replSet rs0 : démarre l'instance en mode replica set (nécessaire aux transactions).
-    # --bind_ip_all : accepte les connexions depuis l'hôte et les autres conteneurs Docker.
-    # --port 27018 : on évite le port standard 27017 pour ne pas entrer en conflit avec une
-    #   éventuelle instance MongoDB locale déjà installée sur la machine (cas fréquent sous
-    #   Windows). Le membre du replica set est donc annoncé sous « localhost:27018 », adresse
-    #   qui, depuis l'hôte, est bien routée vers ce conteneur.
+    # --replSet rs0 : mode replica set (nécessaire aux transactions multi-documents).
+    # --bind_ip_all : accepte les connexions des autres conteneurs et de l'hôte.
+    # --port 27018 : évite un éventuel MongoDB local déjà présent sur 27017 (fréquent sous Windows).
     command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27018"]
     ports:
       - "27018:27018"
     volumes:
       - mongo_data:/data/db
-    # Le healthcheck initialise automatiquement le replica set au premier démarrage
-    # (opération idempotente : ré-exécutée, rs.initiate échoue et on relit simplement rs.status).
+    # Initialise le replica set au premier démarrage (idempotent). Le membre est annoncé sous le
+    # nom de service « mongodb », résolu par le DNS Docker depuis le backend comme depuis ce nœud.
     healthcheck:
       test: >
         mongosh --port 27018 --quiet --eval "
           try { rs.status().ok }
-          catch (e) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'localhost:27018' }] }).ok }
+          catch (e) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'mongodb:27018' }] }).ok }
         "
       interval: 5s
       timeout: 30s
       start_period: 5s
       retries: 30
+
+  backend:
+    build: ./backend
+    container_name: minitransfer-backend
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      # Le backend joint MongoDB par son nom de service « mongodb » sur le réseau Docker.
+      MONGODB_URI: mongodb://mongodb:27018/minitransfer?replicaSet=rs0
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-a-remplacer-par-une-valeur-aleatoire-de-256-bits-0123456789}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
 
 volumes:
   mongo_data:
