@@ -7,6 +7,10 @@ MiniTransfer est une plateforme simplifiée de transfert d'argent : un utilisate
 
 **Stack :** Flutter (Android) · Java / Spring Boot 3 · MongoDB 7 · Docker
 
+> 🎥 **Vidéo de démonstration :** [Voir la démo de l'application (Google Drive)](https://drive.google.com/file/d/1UGYeUqH5nsdvH_COzWxFOPCRiI1G0-Uk/view?usp=sharing)
+>
+> _La vidéo est hébergée sur Google Drive et n'est pas incluse dans le dépôt en raison de sa taille._
+
 ---
 
 ## Table des matières
@@ -86,7 +90,6 @@ MiniTransfer/
 ├── docker-compose.yml          # MongoDB + backend (une commande)
 ├── api/
 │   └── MiniTransfer.postman_collection.json
-├── docs/                       # captures / vidéo de démo (DL2)
 ├── backend/
 │   ├── Dockerfile
 │   ├── pom.xml
@@ -458,7 +461,7 @@ Couverture : contrôleurs Riverpod, repositories, écrans (widget tests), stocka
 | **Swagger / OpenAPI** | http://localhost:8080/swagger-ui.html |
 | **Collection Postman** | `api/MiniTransfer.postman_collection.json` (capture automatique du token JWT) |
 | **Tests** | 58 tests backend + 35 tests mobile |
-| **Vidéo de démo** | à déposer dans `docs/` (étape DL2) |
+| **Vidéo de démo** | Hébergée sur Google Drive (lien en haut du README) — non incluse dans le dépôt vu sa taille |
 
 ---
 
@@ -471,17 +474,15 @@ Couverture : contrôleurs Riverpod, repositories, écrans (widget tests), stocka
 | **Port MongoDB** | `27018` au lieu de `27017` pour éviter les conflits locaux - documenté dans `docker-compose.yml` et `application.yml`. |
 | **JWT de développement** | Secret par défaut dans `docker-compose.yml` ; à remplacer en production. |
 | **Signature APK release** | Build release Flutter signé avec la clé debug par défaut ; pour un déploiement Play Store, configurer un keystore de release. |
-| **Vidéo** | Non incluse dans ce commit (prévue en DL2). |
 
 ---
 
 ## Temps passé
 
-**Environ 6 jours calendaires** (durée recommandée par le sujet : 5 à 7 jours), répartis ainsi :
+**Environ 5 jours** au total, à compter du jour de réception du sujet (durée recommandée : 5 à 7 jours) :
 
-- Backend (API, sécurité, transferts transactionnels, tests) : ~3 jours
-- Mobile Flutter (écrans, intégration API, UX, tests) : ~2 jours
-- Docker, documentation, validation de bout en bout : ~1 jour
+- **2 jours** de montée en compétence sur **Flutter** (première expérience avec ce framework) ;
+- **3 jours** d'implémentation complète : backend (API, sécurité, transferts transactionnels), application mobile, Docker, tests et documentation.
 
 ---
 

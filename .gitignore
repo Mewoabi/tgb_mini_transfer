@@ -21,6 +21,9 @@ desktop.ini
 *.env
 !*.env.example
 
+# ----- Médias volumineux (vidéo de démo hébergée sur Google Drive, voir README) -----
+docs/
+
 # ============================================================
 # Backend — Java / Maven / Spring Boot
 # ============================================================
