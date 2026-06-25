@@ -1,0 +1,6 @@
+# Réduit le contexte de build envoyé au démon Docker.
+target/
+.idea/
+*.iml
+.vscode/
+.git/

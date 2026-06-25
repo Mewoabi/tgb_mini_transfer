@@ -1,0 +1,34 @@
+# Configuration de l'application MiniTransfer (backend Spring Boot).
+spring:
+  application:
+    name: MiniTransfer
+  data:
+    mongodb:
+      # URI surchargeable via la variable d'environnement MONGODB_URI (ex. en Docker).
+      # replicaSet=rs0 : le pilote reconnaît le replica set, condition nécessaire aux
+      # transactions multi-documents (un nœud vu comme « autonome » les refuserait).
+      # Port 27018 : celui exposé par le conteneur MongoDB (voir docker-compose.yml), choisi
+      # pour ne pas entrer en conflit avec une éventuelle instance MongoDB locale sur 27017.
+      uri: ${MONGODB_URI:mongodb://localhost:27018/minitransfer?replicaSet=rs0}
+      # Crée automatiquement au démarrage les index déclarés par annotation (@Indexed),
+      # notamment les index uniques sur l'email et le téléphone.
+      auto-index-creation: true
+
+server:
+  port: 8080
+
+# Exposition de l'endpoint de santé (permet de vérifier la connexion à MongoDB).
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+# Paramètres JWT — exploités à partir de l'étape sécurité (B3). À surcharger en production.
+app:
+  jwt:
+    secret: ${JWT_SECRET:dev-secret-a-remplacer-par-une-valeur-aleatoire-de-256-bits-0123456789}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
