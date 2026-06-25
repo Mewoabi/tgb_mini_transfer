@@ -38,6 +38,8 @@ public class SecurityConfig {
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/api/auth/**").permitAll()
 						.requestMatchers("/actuator/health", "/actuator/info").permitAll()
+						// Documentation publique (OpenAPI JSON + Swagger UI).
+						.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 						.anyRequest().authenticated())
 				// Renvoie un 401 JSON normalisé en cas de requête non authentifiée.
 				.exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
