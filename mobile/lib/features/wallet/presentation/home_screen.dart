@@ -45,9 +45,10 @@ class HomeScreen extends ConsumerWidget {
               ),
               data: (balance) => _BalanceView(
                 balance: balance,
-                // push (et non go) : empile l'écran de transfert au-dessus de l'accueil,
+                // push (et non go) : empile l'écran au-dessus de l'accueil,
                 // ce qui fournit un bouton retour automatique.
                 onTransfer: () => context.push(AppRoutes.transfer),
+                onHistory: () => context.push(AppRoutes.history),
               ),
             ),
           ],
@@ -59,10 +60,15 @@ class HomeScreen extends ConsumerWidget {
 
 /// Carte de solde + bouton de transfert.
 class _BalanceView extends StatelessWidget {
-  const _BalanceView({required this.balance, required this.onTransfer});
+  const _BalanceView({
+    required this.balance,
+    required this.onTransfer,
+    required this.onHistory,
+  });
 
   final WalletBalance balance;
   final VoidCallback onTransfer;
+  final VoidCallback onHistory;
 
   @override
   Widget build(BuildContext context) {
@@ -99,6 +105,12 @@ class _BalanceView extends StatelessWidget {
           onPressed: onTransfer,
           icon: const Icon(Icons.send),
           label: const Text('Transférer'),
+        ),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
+          onPressed: onHistory,
+          icon: const Icon(Icons.history),
+          label: const Text('Historique'),
         ),
       ],
     );

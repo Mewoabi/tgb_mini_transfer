@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/application/auth_controller.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
+import '../../features/history/presentation/history_screen.dart';
 import '../../features/transfer/presentation/transfer_screen.dart';
 import '../../features/wallet/presentation/home_screen.dart';
 import '../presentation/splash_screen.dart';
@@ -17,6 +18,7 @@ class AppRoutes {
   static const String register = '/register';
   static const String home = '/home';
   static const String transfer = '/transfer';
+  static const String history = '/history';
 }
 
 /// Routeur de l'application avec garde d'authentification.
@@ -65,6 +67,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: AppRoutes.register, builder: (_, _) => const RegisterScreen()),
       GoRoute(path: AppRoutes.home, builder: (_, _) => const HomeScreen()),
       GoRoute(path: AppRoutes.transfer, builder: (_, _) => const TransferScreen()),
+      GoRoute(path: AppRoutes.history, builder: (_, _) => const HistoryScreen()),
     ],
   );
 });
