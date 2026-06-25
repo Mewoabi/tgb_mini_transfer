@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/storage/secure_token_storage.dart';
+import 'current_user_controller.dart';
 import '../data/auth_repository.dart';
 
 /// État d'authentification de la session.
@@ -45,18 +46,21 @@ class AuthController extends Notifier<AuthStatus> {
       password: password,
     );
     await _tokenStorage.saveToken(result.token);
+    await ref.read(currentUserProvider.notifier).setUser(result.user);
     state = AuthStatus.authenticated;
   }
 
   Future<void> login({required String email, required String password}) async {
     final result = await _repository.login(email: email, password: password);
     await _tokenStorage.saveToken(result.token);
+    await ref.read(currentUserProvider.notifier).setUser(result.user);
     state = AuthStatus.authenticated;
   }
 
   /// Déconnexion : efface le token et repasse en état non authentifié.
   Future<void> logout() async {
     await _tokenStorage.clear();
+    await ref.read(currentUserProvider.notifier).clearUser();
     state = AuthStatus.unauthenticated;
   }
 }

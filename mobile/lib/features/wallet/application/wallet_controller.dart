@@ -1,14 +1,21 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../auth/application/auth_controller.dart';
 import '../data/wallet_repository.dart';
 import '../domain/wallet_balance.dart';
 
 /// Contrôleur du solde : charge le solde au premier accès et permet de le rafraîchir.
 ///
 /// L'état est un [AsyncValue] : l'UI gère uniformément le chargement, l'erreur et la donnée.
+/// Reconstruit automatiquement lors d'un changement de session (connexion / déconnexion).
 class WalletController extends AsyncNotifier<WalletBalance> {
   @override
   Future<WalletBalance> build() {
+    final status = ref.watch(authControllerProvider);
+    if (status != AuthStatus.authenticated) {
+      // Pas d'appel API sans session active (ex. pendant la déconnexion).
+      return Future.value(const WalletBalance(balance: 0, currency: 'FCFA'));
+    }
     return ref.read(walletRepositoryProvider).getBalance();
   }
 
@@ -19,6 +26,7 @@ class WalletController extends AsyncNotifier<WalletBalance> {
   }
 }
 
-final walletControllerProvider = AsyncNotifierProvider<WalletController, WalletBalance>(
+final walletControllerProvider =
+    AsyncNotifierProvider.autoDispose<WalletController, WalletBalance>(
   WalletController.new,
 );

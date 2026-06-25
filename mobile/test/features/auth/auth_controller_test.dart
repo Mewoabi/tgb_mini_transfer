@@ -56,6 +56,10 @@ void main() {
 
     expect(container.read(authControllerProvider), AuthStatus.authenticated);
     verify(() => secureStorage.write(key: 'auth_token', value: 'tok')).called(1);
+    verify(() => secureStorage.write(
+          key: 'auth_user',
+          value: any(named: 'value'),
+        )).called(1);
   });
 
   test('login en échec propage l\'erreur et reste non authentifié', () async {
@@ -93,6 +97,10 @@ void main() {
 
     expect(container.read(authControllerProvider), AuthStatus.authenticated);
     verify(() => secureStorage.write(key: 'auth_token', value: 'tok2')).called(1);
+    verify(() => secureStorage.write(
+          key: 'auth_user',
+          value: any(named: 'value'),
+        )).called(1);
   });
 
   test('logout efface le token et repasse en non authentifié', () async {
@@ -103,5 +111,6 @@ void main() {
 
     expect(container.read(authControllerProvider), AuthStatus.unauthenticated);
     verify(() => secureStorage.delete(key: 'auth_token')).called(1);
+    verify(() => secureStorage.delete(key: 'auth_user')).called(1);
   });
 }

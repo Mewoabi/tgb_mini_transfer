@@ -6,6 +6,8 @@ import 'package:minitransfer/features/history/data/history_repository.dart';
 import 'package:minitransfer/features/history/domain/transaction_item.dart';
 import 'package:mocktail/mocktail.dart';
 
+import '../../helpers/auth_test_helpers.dart';
+
 class _MockHistoryRepository extends Mock implements HistoryRepository {}
 
 final _items = [
@@ -26,7 +28,10 @@ void main() {
   setUp(() {
     repository = _MockHistoryRepository();
     container = ProviderContainer(
-      overrides: [historyRepositoryProvider.overrideWithValue(repository)],
+      overrides: [
+        historyRepositoryProvider.overrideWithValue(repository),
+        authenticatedAuthOverride,
+      ],
     );
     addTearDown(container.dispose);
   });

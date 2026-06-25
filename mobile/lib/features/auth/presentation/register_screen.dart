@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/presentation/widgets/app_snackbar.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/utils/validators.dart';
 import '../application/auth_controller.dart';
@@ -44,9 +45,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           );
       // Succès : la garde du routeur redirige automatiquement vers l'accueil.
     } on ApiException catch (error) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
-      }
+      if (mounted) AppSnackBar.show(context, error.message);
     } finally {
       if (mounted) setState(() => _submitting = false);
     }

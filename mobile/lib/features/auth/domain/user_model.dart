@@ -25,4 +25,12 @@ class UserModel {
       balance: (json['balance'] as num).toInt(),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'email': email,
+        'phone': phone,
+        'balance': balance,
+      };
 }

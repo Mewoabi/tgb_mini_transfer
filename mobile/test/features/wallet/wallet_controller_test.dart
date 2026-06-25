@@ -6,6 +6,8 @@ import 'package:minitransfer/features/wallet/data/wallet_repository.dart';
 import 'package:minitransfer/features/wallet/domain/wallet_balance.dart';
 import 'package:mocktail/mocktail.dart';
 
+import '../../helpers/auth_test_helpers.dart';
+
 class _MockWalletRepository extends Mock implements WalletRepository {}
 
 void main() {
@@ -15,7 +17,10 @@ void main() {
   setUp(() {
     repository = _MockWalletRepository();
     container = ProviderContainer(
-      overrides: [walletRepositoryProvider.overrideWithValue(repository)],
+      overrides: [
+        walletRepositoryProvider.overrideWithValue(repository),
+        authenticatedAuthOverride,
+      ],
     );
     addTearDown(container.dispose);
   });

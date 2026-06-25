@@ -8,6 +8,7 @@ import '../../features/auth/presentation/register_screen.dart';
 import '../../features/history/presentation/history_screen.dart';
 import '../../features/transfer/presentation/transfer_screen.dart';
 import '../../features/wallet/presentation/home_screen.dart';
+import '../presentation/app_shell.dart';
 import '../presentation/splash_screen.dart';
 
 /// Chemins de l'application.
@@ -65,9 +66,36 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: AppRoutes.splash, builder: (_, _) => const SplashScreen()),
       GoRoute(path: AppRoutes.login, builder: (_, _) => const LoginScreen()),
       GoRoute(path: AppRoutes.register, builder: (_, _) => const RegisterScreen()),
-      GoRoute(path: AppRoutes.home, builder: (_, _) => const HomeScreen()),
-      GoRoute(path: AppRoutes.transfer, builder: (_, _) => const TransferScreen()),
-      GoRoute(path: AppRoutes.history, builder: (_, _) => const HistoryScreen()),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) =>
+            AppShell(navigationShell: navigationShell),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.home,
+                builder: (_, _) => const HomeScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.transfer,
+                builder: (_, _) => const TransferScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.history,
+                builder: (_, _) => const HistoryScreen(),
+              ),
+            ],
+          ),
+        ],
+      ),
     ],
   );
 });
