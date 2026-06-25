@@ -4,11 +4,14 @@ import com.mongodb.client.result.UpdateResult;
 import com.tgbsolutions.minitransfer.common.InsufficientBalanceException;
 import com.tgbsolutions.minitransfer.common.InvalidTransferException;
 import com.tgbsolutions.minitransfer.common.ResourceNotFoundException;
+import com.tgbsolutions.minitransfer.transfer.dto.TransactionDirection;
+import com.tgbsolutions.minitransfer.transfer.dto.TransactionHistoryItem;
 import com.tgbsolutions.minitransfer.transfer.dto.TransferRequest;
 import com.tgbsolutions.minitransfer.transfer.dto.TransferResponse;
 import com.tgbsolutions.minitransfer.user.User;
 import com.tgbsolutions.minitransfer.user.UserRepository;
 import java.time.Instant;
+import java.util.List;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -78,6 +81,25 @@ public class TransferService {
 		long newBalance = sender.getBalance() - amount;
 		return new TransferResponse(transaction.getId(), recipient.getName(), amount,
 				transaction.getTimestamp(), transaction.getStatus(), newBalance);
+	}
+
+	/**
+	 * Historique des transactions de l'utilisateur (émises et reçues), triées par date décroissante.
+	 * Chaque élément est présenté selon le sens (émise/reçue) du point de vue de l'utilisateur.
+	 */
+	public List<TransactionHistoryItem> getHistory(String userId) {
+		return transactionRepository.findBySenderIdOrRecipientIdOrderByTimestampDesc(userId, userId)
+				.stream()
+				.map(transaction -> toHistoryItem(transaction, userId))
+				.toList();
+	}
+
+	private TransactionHistoryItem toHistoryItem(Transaction transaction, String userId) {
+		boolean sent = transaction.getSenderId().equals(userId);
+		TransactionDirection direction = sent ? TransactionDirection.SENT : TransactionDirection.RECEIVED;
+		String counterparty = sent ? transaction.getRecipientName() : transaction.getSenderName();
+		return new TransactionHistoryItem(transaction.getId(), direction, counterparty,
+				transaction.getAmount(), transaction.getTimestamp(), transaction.getStatus());
 	}
 
 	/** Résout le destinataire par email, puis par téléphone. */

@@ -1,11 +1,14 @@
 package com.tgbsolutions.minitransfer.transfer;
 
 import com.tgbsolutions.minitransfer.security.CurrentUser;
+import com.tgbsolutions.minitransfer.transfer.dto.TransactionHistoryItem;
 import com.tgbsolutions.minitransfer.transfer.dto.TransferRequest;
 import com.tgbsolutions.minitransfer.transfer.dto.TransferResponse;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,5 +34,11 @@ public class TransferController {
 	public TransferResponse transfer(@AuthenticationPrincipal CurrentUser currentUser,
 			@Valid @RequestBody TransferRequest request) {
 		return transferService.transfer(currentUser.id(), request);
+	}
+
+	/** Historique des transactions de l'utilisateur connecté, triées par date décroissante. */
+	@GetMapping("/history")
+	public List<TransactionHistoryItem> history(@AuthenticationPrincipal CurrentUser currentUser) {
+		return transferService.getHistory(currentUser.id());
 	}
 }

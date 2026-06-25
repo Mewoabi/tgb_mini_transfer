@@ -1,6 +1,7 @@
 package com.tgbsolutions.minitransfer.transfer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -43,6 +44,9 @@ class TransferControllerTest {
 	@Autowired
 	JwtService jwtService;
 
+	@Autowired
+	TransactionRepository transactionRepository;
+
 	private User sender;
 	private User recipient;
 	private String senderToken;
@@ -50,6 +54,7 @@ class TransferControllerTest {
 	@BeforeEach
 	void setUp() {
 		userRepository.deleteAll();
+		transactionRepository.deleteAll();
 		sender = userRepository.save(new User("Alice", "alice@mail.com", "+237600000001", "hash", 10_000L, Instant.now()));
 		recipient = userRepository.save(new User("Bob", "bob@mail.com", "+237600000002", "hash", 10_000L, Instant.now()));
 		senderToken = jwtService.generateToken(sender.getId(), sender.getEmail(), sender.getName());
@@ -140,5 +145,34 @@ class TransferControllerTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(json(new TransferRequest("bob@mail.com", 1_000L))))
 				.andExpect(status().isUnauthorized());
+	}
+
+	// Sans token, l'historique est refusé (401).
+	@Test
+	void historyRequiresAuthentication() throws Exception {
+		mockMvc.perform(get("/api/transfers/history"))
+				.andExpect(status().isUnauthorized());
+	}
+
+	// L'historique regroupe transactions émises et reçues, triées du plus récent au plus ancien.
+	@Test
+	void historyReturnsSentAndReceivedNewestFirst() throws Exception {
+		Instant now = Instant.now();
+		// Plus ancienne : Alice a envoyé à Bob (émise du point de vue d'Alice).
+		transactionRepository.save(new Transaction(sender.getId(), recipient.getId(), "Alice", "Bob",
+				1_000L, now.minusSeconds(60), TransactionStatus.COMPLETED));
+		// Plus récente : Bob a envoyé à Alice (reçue du point de vue d'Alice).
+		transactionRepository.save(new Transaction(recipient.getId(), sender.getId(), "Bob", "Alice",
+				2_000L, now, TransactionStatus.COMPLETED));
+
+		mockMvc.perform(get("/api/transfers/history").header(HttpHeaders.AUTHORIZATION, "Bearer " + senderToken))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.length()").value(2))
+				.andExpect(jsonPath("$[0].direction").value("RECEIVED"))
+				.andExpect(jsonPath("$[0].counterpartyName").value("Bob"))
+				.andExpect(jsonPath("$[0].amount").value(2000))
+				.andExpect(jsonPath("$[1].direction").value("SENT"))
+				.andExpect(jsonPath("$[1].counterpartyName").value("Bob"))
+				.andExpect(jsonPath("$[1].amount").value(1000));
 	}
 }

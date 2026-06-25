@@ -12,11 +12,14 @@ import com.mongodb.client.result.UpdateResult;
 import com.tgbsolutions.minitransfer.common.InsufficientBalanceException;
 import com.tgbsolutions.minitransfer.common.InvalidTransferException;
 import com.tgbsolutions.minitransfer.common.ResourceNotFoundException;
+import com.tgbsolutions.minitransfer.transfer.dto.TransactionDirection;
+import com.tgbsolutions.minitransfer.transfer.dto.TransactionHistoryItem;
 import com.tgbsolutions.minitransfer.transfer.dto.TransferRequest;
 import com.tgbsolutions.minitransfer.transfer.dto.TransferResponse;
 import com.tgbsolutions.minitransfer.user.User;
 import com.tgbsolutions.minitransfer.user.UserRepository;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -151,5 +154,34 @@ class TransferServiceTest {
 
 		assertThatThrownBy(() -> transferService.transfer("sender-1", new TransferRequest("bob@mail.com", 1_000L)))
 				.isInstanceOf(ResourceNotFoundException.class);
+	}
+
+	// L'historique distingue les transactions émises et reçues et nomme la contrepartie.
+	@Test
+	void historyMapsDirectionsAndCounterparties() {
+		Transaction received = new Transaction("other", "user-1", "Carol", "Alice", 2_000L, Instant.now(), TransactionStatus.COMPLETED);
+		received.setId("t2");
+		Transaction sent = new Transaction("user-1", "other", "Alice", "Bob", 1_000L, Instant.now(), TransactionStatus.COMPLETED);
+		sent.setId("t1");
+		// Le dépôt renvoie déjà la liste triée par date décroissante.
+		when(transactionRepository.findBySenderIdOrRecipientIdOrderByTimestampDesc("user-1", "user-1"))
+				.thenReturn(List.of(received, sent));
+
+		List<TransactionHistoryItem> history = transferService.getHistory("user-1");
+
+		assertThat(history).hasSize(2);
+		assertThat(history.get(0).direction()).isEqualTo(TransactionDirection.RECEIVED);
+		assertThat(history.get(0).counterpartyName()).isEqualTo("Carol");
+		assertThat(history.get(1).direction()).isEqualTo(TransactionDirection.SENT);
+		assertThat(history.get(1).counterpartyName()).isEqualTo("Bob");
+	}
+
+	// L'historique est vide lorsqu'il n'y a aucune transaction.
+	@Test
+	void historyIsEmptyWhenNoTransactions() {
+		when(transactionRepository.findBySenderIdOrRecipientIdOrderByTimestampDesc("user-1", "user-1"))
+				.thenReturn(List.of());
+
+		assertThat(transferService.getHistory("user-1")).isEmpty();
 	}
 }
